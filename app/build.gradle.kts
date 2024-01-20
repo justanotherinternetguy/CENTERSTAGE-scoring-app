@@ -91,4 +91,5 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-rxjava2:1.5.4")
     implementation("androidx.compose.ui:ui:1.5.4")
     implementation("androidx.compose.material:material:1.5.4")
+    implementation("androidx.compose.animation:animation:1.5.4")
 }

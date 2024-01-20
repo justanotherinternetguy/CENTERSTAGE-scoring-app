@@ -3,26 +3,24 @@
 package com.example.centerstage_scoring_app
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ImageFormat
 import android.graphics.Matrix
-import android.graphics.Rect
-import android.graphics.YuvImage
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.video.ExperimentalVideo
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -38,68 +36,48 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.centerstage_scoring_app.ui.theme.CENTERSTAGEscoringappTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 
+@Composable
+fun ImageTakenText(visible: Boolean) {
+    val alpha by animateFloatAsState(
+        if (visible) 1f else 0f,
+//        animationSpec = tween(1000), label = "Image Taken!"
+    )
 
-//
-//import android.os.Bundle
-//import androidx.activity.ComponentActivity
-//import androidx.activity.compose.setContent
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.material3.MaterialTheme
-//import androidx.compose.material3.Surface
-//import androidx.compose.material3.Text
-//import androidx.compose.runtime.Composable
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.tooling.preview.Preview
-//import com.example.centerstage_scoring_app.ui.theme.CENTERSTAGEscoringappTheme
-//
-//
-//class MainActivity : ComponentActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContent {
-//            CENTERSTAGEscoringappTheme {
-//                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    Greeting("Android")
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//fun Greeting(name: String, modifier: Modifier = Modifier) {
-//    Text(
-//        text = "Hello $name!",
-//        modifier = modifier
-//    )
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    CENTERSTAGEscoringappTheme {
-//        Greeting("Android")
-//    }
-//}
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .alpha(alpha)
+            .background(Color.Blue)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Image taken",
+            color = Color.White
+        )
+    }
+}
 
 @ExperimentalVideo class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,7 +101,8 @@ import java.io.ByteArrayOutputStream
                 }
                 val viewModel = viewModel<MainViewModel>()
                 val bitmaps by viewModel.bitmaps.collectAsState()
-
+                var isImageTaken by remember { mutableStateOf(false) }
+                ImageTakenText(visible = isImageTaken)
                 BottomSheetScaffold(
                     scaffoldState = scaffoldState,
                     sheetPeekHeight = 0.dp,
@@ -145,7 +124,6 @@ import java.io.ByteArrayOutputStream
                             modifier = Modifier
                                 .fillMaxSize()
                         )
-
                         IconButton(
                             onClick = {
                                 controller.cameraSelector =
@@ -182,10 +160,23 @@ import java.io.ByteArrayOutputStream
                                 )
                             }
                             IconButton(
+//                                onClick = {
+//                                    takePhoto(
+//                                        controller = controller,
+//                                        onPhotoTaken = viewModel::onTakePhoto
+//                                    )
+//                                }
                                 onClick = {
                                     takePhoto(
                                         controller = controller,
-                                        onPhotoTaken = viewModel::onTakePhoto
+                                        onPhotoTaken = {
+                                            isImageTaken = true
+                                            scope.launch {
+                                                delay(1000)
+                                                isImageTaken = false
+                                            }
+                                            viewModel.onTakePhoto(it)
+                                        }
                                     )
                                 }
                             ) {
@@ -194,6 +185,9 @@ import java.io.ByteArrayOutputStream
                                     contentDescription = "Take photo"
                                 )
                             }
+                        }
+                        if (isImageTaken) {
+                            ImageTakenText(visible = true)
                         }
                     }
                 }
