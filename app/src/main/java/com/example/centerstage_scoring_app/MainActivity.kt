@@ -84,6 +84,8 @@ fun ImageTakenText(visible: Boolean) {
 }
 
 
+
+
 @ExperimentalVideo
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
