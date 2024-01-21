@@ -27,16 +27,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.centerstage_scoring_app.ui.theme.CENTERSTAGEscoringappTheme
 import kotlinx.coroutines.delay
@@ -60,7 +62,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ImageTakenText(visible: Boolean) {
     val alpha by animateFloatAsState(
-        if (visible) 1f else 0f,
+        if (visible) 0.5f else 0f,
 //        animationSpec = tween(1000), label = "Image Taken!"
     )
 
@@ -78,8 +80,8 @@ fun ImageTakenText(visible: Boolean) {
         )
     }
 }
-
-@ExperimentalVideo class MainActivity : ComponentActivity() {
+@ExperimentalVideo
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!hasRequiredPermissions()) {
@@ -155,17 +157,11 @@ fun ImageTakenText(visible: Boolean) {
                                 }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Edit,
+                                    imageVector = Icons.Default.Email,
                                     contentDescription = "Open gallery"
                                 )
                             }
                             IconButton(
-//                                onClick = {
-//                                    takePhoto(
-//                                        controller = controller,
-//                                        onPhotoTaken = viewModel::onTakePhoto
-//                                    )
-//                                }
                                 onClick = {
                                     takePhoto(
                                         controller = controller,
@@ -217,8 +213,9 @@ fun ImageTakenText(visible: Boolean) {
                         matrix,
                         true
                     )
-
+                    Log.d("Camera", "-- PHOTO TAKEN --")
                     onPhotoTaken(rotatedBitmap)
+                    image.close()
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -244,11 +241,10 @@ fun ImageTakenText(visible: Boolean) {
             Manifest.permission.RECORD_AUDIO,
         )
     }
-    fun ImageProxy.toBitmap(): Bitmap {
+    public fun ImageProxy.toBitmap(): Bitmap {
         val buffer = planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 }
-
