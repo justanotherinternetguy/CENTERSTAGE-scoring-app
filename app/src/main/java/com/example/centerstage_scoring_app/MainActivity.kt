@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
+import android.view.Display
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.camera.core.CameraSelector
@@ -19,7 +20,6 @@ import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.video.ExperimentalVideo
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,17 +27,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,15 +49,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.centerstage_scoring_app.ui.theme.CENTERSTAGEscoringappTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.floor
+
 
 @Composable
 fun ImageTakenText(visible: Boolean) {
@@ -71,6 +74,7 @@ fun ImageTakenText(visible: Boolean) {
             .fillMaxSize()
             .alpha(alpha)
             .background(Color.Blue)
+            .offset(0.dp, 100.dp)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -80,6 +84,8 @@ fun ImageTakenText(visible: Boolean) {
         )
     }
 }
+
+
 @ExperimentalVideo
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +95,7 @@ class MainActivity : ComponentActivity() {
                 this, CAMERAX_PERMISSIONS, 0
             )
         }
+
         setContent {
             CENTERSTAGEscoringappTheme {
                 val scope = rememberCoroutineScope()
@@ -104,6 +111,8 @@ class MainActivity : ComponentActivity() {
                 val viewModel = viewModel<MainViewModel>()
                 val bitmaps by viewModel.bitmaps.collectAsState()
                 var isImageTaken by remember { mutableStateOf(false) }
+                val width  = ScreenUtils.getScreenWidth(applicationContext)
+                val height = ScreenUtils.getScreenHeight(applicationContext)
                 ImageTakenText(visible = isImageTaken)
                 BottomSheetScaffold(
                     scaffoldState = scaffoldState,
@@ -139,6 +148,22 @@ class MainActivity : ComponentActivity() {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Switch camera"
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .background(Color.Red.copy(alpha = 0.25f)) // Set the background color with opacity
+                                .size(300.dp, 600.dp)
+                                .scale(0.7f)
+                                .align(Alignment.Center)
+                        ) {
+                            // Add your text composable or any other content for the overlay
+                            Text(
+                                text = "Align the backboard with the red rectangle",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
                             )
                         }
 
@@ -214,6 +239,8 @@ class MainActivity : ComponentActivity() {
                         true
                     )
                     Log.d("Camera", "-- PHOTO TAKEN --")
+                    Log.d("Width", ScreenUtils.getScreenWidth(applicationContext).toString());
+                    Log.d("Height", ScreenUtils.getScreenHeight(applicationContext).toString());
                     onPhotoTaken(rotatedBitmap)
                     image.close()
                 }
