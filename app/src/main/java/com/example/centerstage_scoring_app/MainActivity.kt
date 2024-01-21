@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
-import android.view.Display
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.camera.core.CameraSelector
@@ -59,7 +58,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.centerstage_scoring_app.ui.theme.CENTERSTAGEscoringappTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.floor
 
 
 @Composable
